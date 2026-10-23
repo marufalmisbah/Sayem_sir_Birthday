@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>শুভ জন্মদিন, প্রিয় স্যার! 🎉</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        bangla: ['Hind Siliguri', 'sans-serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        gold: {
+                            100: '#fef9c3',
+                            300: '#fde047',
+                            400: '#facc15',
+                            500: '#eab308',
+                        }
+                    },
+                    animation: {
+                        'float': 'float 4s ease-in-out infinite',
+                        'flicker': 'flicker 1.5s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        flicker: {
+                            '0%, 100%': { opacity: '1', transform: 'scale(1)' },
+                            '50%': { opacity: '0.8', transform: 'scale(0.92) translateY(1px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Hind Siliguri', 'Plus Jakarta Sans', sans-serif;
+            background-color: #0b0f19;
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism Styles */
+        .glass-card {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card-gold {
+            background: rgba(234, 179, 8, 0.06);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(234, 179, 8, 0.25);
+        }
+
+        /* Glowing Effects */
+        .text-glow {
+            text-shadow: 0 0 20px rgba(234, 179, 8, 0.5), 0 0 40px rgba(168, 85, 247, 0.3);
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Animated Birthday Cake Styles */
+        .cake-container {
+            position: relative;
+            width: 220px;
+            height: 200px;
+            margin: 0 auto;
+        }
+
+        .plate {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 230px;
+            height: 14px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5), inset 0 -2px 5px rgba(0,0,0,0.2);
+        }
+
+        .layer {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 14px 14px 10px 10px;
+            box-shadow: inset 0 -4px 6px rgba(0,0,0,0.3);
+        }
+
+        .layer-bottom {
+            bottom: 12px;
+            width: 190px;
+            height: 55px;
+            background: linear-gradient(to right, #7e22ce, #a855f7, #7e22ce);
+        }
+
+        .layer-middle {
+            bottom: 65px;
+            width: 145px;
+            height: 48px;
+            background: linear-gradient(to right, #d97706, #f59e0b, #d97706);
+        }
+
+        .layer-top {
+            bottom: 110px;
+            width: 105px;
+            height: 42px;
+            background: linear-gradient(to right, #ec4899, #f472b6, #ec4899);
+        }
+
+        /* Cream Frosting details */
+        .frosting {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 12px;
+            background: #ffffff;
+            border-radius: 10px 10px 6px 6px;
+            opacity: 0.9;
+        }
+
+        /* Candle & Flame */
+        .candle {
+            position: absolute;
+            bottom: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 38px;
+            background: repeating-linear-gradient(45deg, #38bdf8, #38bdf8 5px, #ffffff 5px, #ffffff 10px);
+            border-radius: 3px 3px 0 0;
+            cursor: pointer;
+            z-index: 20;
+        }
+
+        .flame {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 14px;
+            height: 22px;
+            background: radial-gradient(ellipse at bottom, #fef08a 0%, #f97316 60%, transparent 100%);
+            border-radius: 50% 50% 35% 35%;
+            filter: drop-shadow(0 0 10px #f97316);
+            transition: all 0.3s ease;
+        }
+
+        .flame.off {
+            opacity: 0;
+            transform: translateX(-50%) scale(0.2);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0f19;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f2937;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="relative min-h-screen text-slate-100 flex flex-col justify-between selection:bg-amber-500 selection:text-black">
+
+    <!-- Canvas Background -->
+    <canvas id="bg-canvas"></canvas>
+
+
+
+
+
+    <!-- Main Container -->
+    <main class="relative z-10 container mx-auto px-4 py-8 max-w-4xl">
+
+        <!-- HEADER SECTION -->
+        <section class="text-center my-6 md:my-10">
+            <div class="inline-block mb-3 px-4 py-1.5 rounded-full glass-card-gold text-amber-300 text-xs md:text-sm font-semibold tracking-wide border border-amber-500/30">
+                ✨ হ্যাপি বার্থডে স্যার ✨
+            </div>
+            
+            <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mb-3 text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-100 text-glow leading-tight">
+                শুভ জন্মদিন, সায়েম স্যার! 🎂🎉
+            </h1>
+            
+            <p class="text-sm md:text-base text-slate-300 max-w-lg mx-auto font-light">
+                আপনার সুস্বাস্থ্য, দীর্ঘায়ু এবং জীবনের সর্বাঙ্গীন সাফল্য কামনা করছি।
+            </p>
+        </section>
+
+        <!-- ANIMATED BIRTHDAY CAKE SECTION -->
+        <section class="my-8 text-center">
+            <div class="glass-card p-6 md:p-8 rounded-3xl border border-slate-800 max-w-md mx-auto relative overflow-hidden shadow-2xl">
+                <div class="absolute -top-10 -left-10 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>
+                
+                <h3 class="text-lg font-bold text-amber-300 mb-1">ক্যান্ডেলটিতে ক্লিক করুন 🕯️</h3>
+                <p class="text-xs text-slate-400 mb-6">উইশ উদযাপনে মোমবাতিতে টাচ করুন</p>
+
+                <!-- Interactive 3D CSS Cake -->
+                <div class="cake-container cursor-pointer" onclick="clickCandle()">
+                    <!-- Candle Flame -->
+                    <div id="candle" class="candle">
+                        <div id="flame" class="flame animate-flicker"></div>
+                    </div>
+                    <!-- Cake Layer Top -->
+                    <div class="layer layer-top">
+                        <div class="frosting"></div>
+                    </div>
+                    <!-- Cake Layer Middle -->
+                    <div class="layer layer-middle">
+                        <div class="frosting"></div>
+                    </div>
+                    <!-- Cake Layer Bottom -->
+                    <div class="layer layer-bottom">
+                        <div class="frosting"></div>
+                    </div>
+                    <!-- Plate -->
+                    <div class="plate"></div>
+                </div>
+
+                <div class="mt-6 flex justify-center gap-3">
+                    <button onclick="triggerConfetti()" class="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-sm rounded-xl shadow-lg shadow-amber-500/20 transition-all transform hover:-translate-y-0.5">
+                        🎉 সেলিব্রেট করুন
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- PROFILE & HEARTFELT MESSAGE CARD -->
+        <section class="my-10">
+            <div class="glass-card p-6 md:p-10 rounded-3xl border border-slate-800 shadow-2xl relative overflow-hidden">
+                <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl"></div>
+
+                <!-- Header info -->
+                <div class="flex flex-col md:flex-row items-center gap-6 mb-8 border-b border-slate-800 pb-6">
+                    <!-- Sir's Photo Frame -->
+                    <div class="relative group flex-shrink-0">
+                        <div class="absolute -inset-1 bg-gradient-to-r from-amber-500 to-purple-600 rounded-2xl blur opacity-50 group-hover:opacity-80 transition duration-500"></div>
+                        <div class="relative w-28 h-28 md:w-32 md:h-32 rounded-2xl overflow-hidden border-2 border-amber-400/40 bg-slate-900 shadow-xl">
+                            <img id="sirPhoto" src="sayem.jpg" 
+                                 onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800'"
+                                 alt="Sir Photo" 
+                                 class="w-full h-full object-cover">
+                        </div>
+                    </div>
+
+                    <div class="text-center md:text-left">
+                        <div class="flex items-center justify-center md:justify-start gap-2 text-amber-400 mb-1">
+                            <i class="fas fa-heart"></i>
+                            <span class="text-xs font-semibold uppercase tracking-wider">মনের গহীনের শ্রদ্ধাঞ্জলি</span>
+                        </div>
+                        <h2 class="text-2xl md:text-3xl font-bold text-slate-100">প্রিয় সায়েম স্যার</h2>
+                        <p class="text-xs md:text-sm text-slate-400 mt-1">আপনার ছোট ভাইয়ের পক্ষ থেকে</p>
+                    </div>
+                </div>
+
+                <!-- Heartfelt Bangla Messages (As requested) -->
+                <div class="space-y-4 text-slate-200 text-base md:text-lg leading-relaxed font-light">
+                    
+                    <div class="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-amber-500/30 transition-all duration-300">
+                        <p class="italic text-slate-200">
+                            "চট্টগ্রামে আসার পর যখন একটা আইটি ইনস্টিটিউটে ভর্তি হই, তখন আপনার সাথে দেখা হয় স্যার। আপনার মতো একজন মেন্টর ও সফল দিকনির্দেশক পেয়ে আমি সত্যিই অনেক ধন্য।"
+                        </p>
+                    </div>
+
+                    <div class="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-amber-500/30 transition-all duration-300">
+                        <p class="italic text-slate-200">
+                            "আপনি শুধু একজন শিক্ষক বা মেন্টর হিসেবে নন, সবসময় একজন বড় ভাইয়ের মতো পরম স্নেহে ও সহমর্মিতায় প্রতিটি বিষয়ে আমার পাশে থেকেছেন।"
+                        </p>
+                    </div>
+
+                    <div class="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 font-medium">
+                        <p>
+                            "ইনশাআল্লাহ, এই তো মাত্র পথচলা শুরু! মহান আল্লাহ যেন আমাদের এই আন্তরিক বন্ডিং ও সম্পর্ককে দুনিয়া ও আখেরাত—উভয় জাহানেই কায়িম ও মজবুত রাখেন। আমিন।"
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="relative z-10 text-center py-6 border-t border-slate-800/80 text-xs text-slate-500">
+        <p>Created with respect & love for Sir • Creative IT Institute, Chattogram</p>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Set Image Source
+        document.addEventListener("DOMContentLoaded", function() {
+            const imgElement = document.getElementById("sirPhoto");
+            imgElement.src = "sayem.jpg";
+            imgElement.onerror = function() {
+                this.src = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800";
+            };
+
+            // Initial Confetti Welcome
+            setTimeout(() => {
+                triggerConfetti();
+            }, 600);
+        });
+
+        // Interactive Candle Flame Toggle
+        let flameLit = true;
+        function clickCandle() {
+            const flame = document.getElementById('flame');
+            if (flameLit) {
+                flame.classList.add('off');
+                flameLit = false;
+                triggerConfetti();
+            } else {
+                flame.classList.remove('off');
+                flameLit = true;
+                triggerConfetti();
+            }
+        }
+
+        // Particle Canvas Animation
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.3;
+                this.speedY = (Math.random() - 0.5) * 0.3;
+                this.opacity = Math.random() * 0.6 + 0.2;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+            }
+            draw() {
+                ctx.fillStyle = `rgba(234, 179, 8, ${this.opacity})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            const count = Math.floor(window.innerWidth / 16);
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle());
+            }
+        }
+        initParticles();
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        // Confetti Burst Effect
+        function triggerConfetti() {
+            confetti({
+                particleCount: 80,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#facc15', '#eab308', '#ec4899', '#38bdf8', '#a855f7']
+            });
+        }
+
+        // Audio Control Logic
+        const audio = document.getElementById('bgMusic');
+        const musicIcon = document.getElementById('musicIcon');
+        const musicText = document.getElementById('musicText');
+        let isPlaying = false;
+
+        function toggleAudio() {
+            if (isPlaying) {
+                audio.pause();
+                musicIcon.className = "fas fa-music text-amber-400";
+                musicText.innerText = "সাউন্ড ট্র্যাক";
+                isPlaying = false;
+            } else {
+                audio.play().then(() => {
+                    musicIcon.className = "fas fa-pause text-amber-400";
+                    musicText.innerText = "পজ করুন";
+                    isPlaying = true;
+                }).catch(err => {
+                    console.log("Audio play error/restriction:", err);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
